@@ -88,40 +88,6 @@ class ObjectiveEvidence:
             result_file_path = os.path.join(unzip_dir, result_file_name)
             yield result_file_path
 
-    def get_evidence_for_spaint0005_7(self):
-
-        for unzipped_result_json_file in self.unzipped_result_json_files_path:
-            library_id = os.path.basename(os.path.dirname(os.path.dirname(unzipped_result_json_file)))
-            with open(unzipped_result_json_file) as f:
-                result_data = json.load(f)
-
-            sequencer_id = result_data['sequencing_run']['metrics'][1]
-            Q30 = result_data['sequencing_run']['metrics'][6]
-            Q30_qc_threshold = result_data['sequencing_run']['qc']
-            total_sample_complexity = result_data['sample']['metrics'][7]
-            per_sample_read_count = result_data['sample']['metrics'][9]
-            sample_qc = result_data['sample']['qc']
-            sequencer_run_start_time = result_data['sequencing_run']['metrics'][3]
-            sample_runner = result_data['sample']['metadata']['sample_runner']
-            data = {
-                'sequencing_run': {
-                    'metrics': [sequencer_id, Q30, sequencer_run_start_time],
-                    'qc': Q30_qc_threshold,
-                },
-                'sample': {
-                    'metrics': [total_sample_complexity, per_sample_read_count],
-                    'qc': sample_qc,
-                    'sample_runner': sample_runner
-
-                }
-            }
-            evidence_dir = os.path.join(self.base_dir, 'spaint0005_7', library_id)
-            if not os.path.exists(evidence_dir):
-                os.makedirs(evidence_dir)
-            evidence_path = os.path.join(evidence_dir, library_id + '.json')
-            with open(evidence_path, 'w') as f:
-                json.dump(data, f, indent=2)
-
 
 def shellmain():
     parser = argparse.ArgumentParser()
@@ -138,7 +104,6 @@ def shellmain():
     my_ins = ObjectiveEvidence(args.s3_bucket, args.prefix)
     my_ins.download_dir()
     my_ins.unzip_file()
-    my_ins.get_evidence_for_spaint0005_7()
 
 
 if __name__ == '__main__':
